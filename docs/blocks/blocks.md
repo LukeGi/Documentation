@@ -8,17 +8,30 @@ Creating a Block
 
 ### Basic Blocks
 
-For simple blocks, which need no special functionality (think cobblestone, wood planks, etc.), a custom class is not necessary. By simply instantiating the `Block` class and calling some of the many setters, one can create many different types of blocks. For instance:
+If the block you are creating has no special functionality (think cobblestone, wooden planks), it is not necessary to create a new class for your block. You can simply instantiate the `Block` class. When doing this you will need a `Block.Builder` to pass to the constructor. This is how we set properties the properties of a block in 1.13+. Here's an exmaple:
 
-- `setHardness` - Controls the time it takes to break the block. It is an arbitrary value. For reference, stone has a hardness of 1.5, and dirt 0.5. If the block should be unbreakable, a convenience method `setBlockUnbreakable` is provided.
-- `setResistance` - Controls the explosion resistance of the block. This is separate from hardness, but `setHardness` will also set the resistance to 5 times the hardness value, if the resistance is any lower than this value.
-- `setSoundType` - Controls the sound the block makes when it is punched, broken, or placed. Requires a `SoundType` argument, see the [sounds][] page for more details.
-- `setLightLevel` - Controls the light emission of the block. **Note:** This method takes a value from zero to one, not zero to fifteen. To calculate this value, take the light level you wish your block to emit and divide by 16. For instance a block which emits level 5 light should pass `5 / 16f` to this method.
-- `setLightOpacity` - Controls the amount light passing through this block will be dimmed. Unlike `setLightLevel` this value is on a scale from zero to 15. For example, setting this to `3` will lower light by 3 levels every time it passes through this type of block.
-- `setUnlocalizedName` - Mostly self explanatory, sets the unlocalized name of the block. This name will be prepended with "tile." and appended with ".name" for localization purposes. For instance `setUnlocalizedName("foo")` will cause the block's actual localization key to be "tile.foo.name". For more advanced localization control, a custom Item will be needed. We'll get into this more later.
-- `setCreativeTab` - Controls which creative tab this block will fall under. This must be called if the block should be shown in the creative menu. Tab options can be found in the `CreativeTabs` class.
+```java
+new Block(Block.Builder.from(Blocks.COBBLESTONE).lightValue(15)).setRegistryName("mymod:myblock");
+```
 
-All these methods are *chainable* which means you can call them in series. See `Block#registerBlocks` for examples of this.
+See `Block.registerBlocks` for more examples on how to create simple blocks.
+
+!!! Note
+
+    Blocks have no setter for Item Group (formerly Creative Tab). This has been moved to the ItemBlock, and is now it's responsibility. Furthermore, there is no setter for translation key (this is generated based on registry name now).
+
+### `Block.Builder`
+To set the properties of the block, you need to use a `Block.Builder`. There are a couple of options when creating a one. You can use `Block.Builder::from` to copy the properties of an existing block or `Block.Builder::create` to create a new one.
+
+The `Block.Builder` has the following setters:
+
+  - `doesNotBlockMovement` - makes it so the block does not block movement, Example Usage: plants.
+  - `slipperiness` - defaults to `0.6F` high values make it more slippery. Example Usage: Ice. **Note:** Vanilla minecraft does not exceed `1.0F` in their blocks slipperiness.
+  - `sound` - Defaults to `SoundType.STONE` see [sounds][] for more information.
+  - `lightValue` - The amount of light emitted by the block. Example Usage: Glowstone. **Note:** this method takes a value from 1 to 15.
+  - `hardnessAndResistance` - Hardness is how long it takes to mine a block (set to -1 for unbreakable). Resistance is explosion resistance.
+  - `needsRandomTick` - makes the block recieve random ticks. Example Usage: Plants.
+  - `variableOpacity` - if set to true, the game will cache whether your block is a full cube in each state, and do stuff accordingly. Example Usage: Shulker Boxes
 
 ### Advanced Blocks
 
